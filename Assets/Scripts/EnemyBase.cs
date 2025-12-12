@@ -56,11 +56,10 @@ public class EnemyBase : MonoBehaviour
     {
         bool canSee = HandleVision();
 
-        // --- GATILHO: MUDANÇA DE VISÃO ---
+        // ---  MUDANÇA DE VISÃO ---
         if (canSee != wasSeeingPlayer)
         {
-            // Se a situação mudou (Vi -> Não Vi, ou Não Vi -> Vi)
-            // Obriga os vermelhos a resetarem os seus timers e posições
+       
             EnemyDificil.RecalculateSquadTactics();
         }
 
