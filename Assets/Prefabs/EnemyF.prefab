@@ -14,8 +14,9 @@ GameObject:
   - component: {fileID: 7444025057613218874}
   - component: {fileID: 7444025057613218878}
   - component: {fileID: 7010143248030500541}
+  - component: {fileID: 5843233440851585884}
   m_Layer: 11
-  m_Name: Enemy
+  m_Name: EnemyF
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -29,8 +30,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7444025057613218872}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 7.82, y: 6, z: 13.875}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -155,7 +156,7 @@ NavMeshAgent:
   m_Radius: 0.5
   m_Speed: 3.5
   m_Acceleration: 40
-  avoidancePriority: 50
+  avoidancePriority: 8
   m_AngularSpeed: 120
   m_StoppingDistance: 0
   m_AutoTraverseOffMeshLink: 1
@@ -165,6 +166,31 @@ NavMeshAgent:
   m_BaseOffset: 1
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &5843233440851585884
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7444025057613218872}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10c2d8e4847547b4eb72d17779272001, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyFacil
+  tipoDeEspera: 0
+  velocidadeRotacaoIdle: 30
+  anguloVigia: 25
+  amountOfRays: 250
+  angleSpread: 20
+  raycastDistance: 10
+  enemyView: {fileID: 7444025058620018201}
+  sightAreaRenderer: {fileID: 7444025058620018203}
+  sightAreaMaterials:
+  - {fileID: 2100000, guid: 068667163eaf49c45952413859f72a6e, type: 2}
+  - {fileID: 2100000, guid: 5b271124608395244ab6c964f81be8a6, type: 2}
+  - {fileID: 2100000, guid: 278df815e7777da45842f376b34b1ede, type: 2}
+  waypointList: []
 --- !u!1 &7444025058620018198
 GameObject:
   m_ObjectHideFlags: 0
