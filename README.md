@@ -1,5 +1,17 @@
 # ProjectAI
+
+#### Stealth Game em Unity com apliçação de 3 métodos principais de Inteligência Artificial
+
+##### Engenharia e Desenvolvimento de Jogos Digitais - Inteligência Artificial Aplicada a Jogos
+
 Game created as a project, where you are the thief trying to steal goods from the warehouse, but you must beware of guards patrolling this building. Once they see you, they will try to catch you. If they get to you, you lose. Can you steal everything?
+
+# __Realizado Por:__
+
+| Nome            | Número  |
+|----------------|--------|
+| **Gabriel Rosas** | 27943  |
+| **Miguel Freitas** | 29562  |
 
 ## Features
 - 3D isometric world
