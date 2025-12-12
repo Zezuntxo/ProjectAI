@@ -13,6 +13,38 @@ Game created as a project, where you are the thief trying to steal goods from th
 | **Gabriel Rosas** | 27943  |
 | **Miguel Freitas** | 29562  |
 
+# __Indíce__
+1. [__Introdução__](#Introdução)
+2. [__Estrutura do Projeto__](#Estrutura)
+   * [__Organização das Pastas__](#Pastas)
+3. [__Funcionalidades__](#Funcionalidades)
+4. [__Modelo de Dados__](#ModelodeDados)
+5. [__Implementação__](#Implementação)
+6. [__Tecnologias__](#Tecnologias)
+7. [__Dificuldades__](#Dificuldades)
+8. [__Conclusão__](#Conclusão)
+
+<a name="Estrutura"></a>
+# __Estrutura do Projeto__
+
+```plaintext
+ProjectAI/
+├── Assets/
+│   ├── Scripts/
+│   │   ├── EnemyBase.cs          
+│   │   ├── EnemyDificil.cs      
+│   │   ├── EnemyFacil.cs         
+│   │   ├── EnemyMedio.cs          
+│   │   ├── GameController.cs                
+│   │   └── Player.cs        
+│   ├── Scenes/                    
+│   ├── Prefabs/                   
+│   ├── Models/                   
+│   ├── Materials/                 
+│   └── Audio/                     
+└── ProjectSettings/
+```
+
 ## Features
 - 3D isometric world
 - Preview level
