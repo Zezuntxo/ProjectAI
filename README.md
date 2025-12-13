@@ -4,7 +4,7 @@
 
 ##### Engenharia e Desenvolvimento de Jogos Digitais - Inteligência Artificial Aplicada a Jogos
 
-Game created as a project, where you are the thief trying to steal goods from the warehouse, but you must beware of guards patrolling this building. Once they see you, they will try to catch you. If they get to you, you lose. Can you steal everything?
+Este projeto é um jogo stealth em que o player é um ladrão a tentar roubar os pertences de um armazém, no entanto, deves ter cuidado com os guardas a patrulhar o edifício. Assim que eles te virem, eles tentarão te apanhar. Se te apanharem perdes. Consegues roubar tudo?
 
 # __Realizado Por:__
 
@@ -162,11 +162,10 @@ public class EnemyBase : MonoBehaviour
     {
         bool canSee = HandleVision();
 
-        // --- GATILHO: MUDANÇA DE VISÃO ---
+        // ---  MUDANÇA DE VISÃO ---
         if (canSee != wasSeeingPlayer)
         {
-            // Se a situação mudou (Vi -> Não Vi, ou Não Vi -> Vi)
-            // Obriga os vermelhos a resetarem os seus timers e posições
+       
             EnemyDificil.RecalculateSquadTactics();
         }
 
@@ -282,6 +281,7 @@ public class EnemyBase : MonoBehaviour
         mesh.triangles = triangles;
     }
 }
+
 ```
 Este script funciona como o "cérebro" dos inimigos. Ele não toma decisões complexas, mas fornece os dados necessários para os outros scripts.
 
@@ -297,77 +297,74 @@ Este script funciona como o "cérebro" dos inimigos. Ele não toma decisões com
 ```
 using UnityEngine;
 
-// Herda de EnemyBase
 public class EnemyFacil : EnemyBase
 {
 
     private bool isChasing = false;
 
-    // Apenas implementa a lógica simples (FSM)
     protected override void RunAI(bool canSeePlayer)
     {
 
-        // Visual Debug (Muda cor do cone)
         sightAreaRenderer.material = sightAreaMaterials[canSeePlayer ? 1 : 0];
 
         if (canSeePlayer)
         {
-            // ESTADO: PERSEGUIR
             isChasing = true;
             navAgent.SetDestination(lastPlayerPosition);
         }
         else
         {
-            // Se perdeu a visão, volta imediatamente à patrulha
             if (isChasing)
             {
                 isChasing = false;
                 ReturnToStart();
             }
 
-            // Lógica normal de andar nos waypoints
             PatrolLogic();
         }
     }
 }
 ```
+O EnemyFácil implementa uma Máquina de Estados Finitos (FSM) muito rudimentar com apenas dois comportamentos e sem memória a longo prazo.
+
+- **`Comportamento`**
+
+  - **`Patrulha`**: Se não vê o jogador, fica de vigia.
+  - **`Perseguição`**: Se vê o jogador, define o destino para a posição atual do jogador (isChasing = true).
+  - **`Limitação`**: Assim que perde o jogador de vista, ele desiste imediatamente. A variável isChasing torna-se falsa e ele chama ReturnToStart(). Não existe procura ou investigação; é uma lógica puramente reativa "Vê = Persegue, Não Vê = Volta".
 
 ## __EnemyMédio.cs__
 
 ```
 using UnityEngine;
 
-// Herda de EnemyBase
 public class EnemyMedio : EnemyBase
 {
 
     private enum State { Patrolling, Chasing, Investigating }
     private State currentState = State.Patrolling;
 
-    // Variáveis exclusivas do Médio
     private float waitTimer = 0f;
     private bool arrivedAtInvestigationPoint = false;
 
     protected override void RunAI(bool canSeePlayer)
     {
 
-        // 1. Prioridade Máxima: Visão
         if (canSeePlayer)
         {
             currentState = State.Chasing;
-            sightAreaRenderer.material = sightAreaMaterials[1]; // Vermelho
+            sightAreaRenderer.material = sightAreaMaterials[1]; 
             navAgent.SetDestination(lastPlayerPosition);
             arrivedAtInvestigationPoint = false;
             return;
         }
 
-        // 2. Lógica de Investigação (Behavior Tree simulada)
         if (currentState == State.Chasing || currentState == State.Investigating)
         {
             currentState = State.Investigating;
-            sightAreaRenderer.material = sightAreaMaterials[2]; // Amarelo
+            sightAreaRenderer.material = sightAreaMaterials[2]; 
 
-            // Vai até onde viu o player pela última vez
+
             if (!arrivedAtInvestigationPoint)
             {
                 navAgent.SetDestination(lastPlayerPosition);
@@ -378,28 +375,37 @@ public class EnemyMedio : EnemyBase
                     waitTimer = 0f;
                 }
             }
-            // Já chegou? Agora espera e roda
+
             else
             {
                 waitTimer += Time.deltaTime;
-                transform.Rotate(0, 100 * Time.deltaTime, 0); // Gira para procurar
+                transform.Rotate(0, 100 * Time.deltaTime, 0); 
 
                 if (waitTimer > 2.0f)
                 {
-                    // Desiste e volta à patrulha
+
                     currentState = State.Patrolling;
-                    sightAreaRenderer.material = sightAreaMaterials[0]; // Verde
+                    sightAreaRenderer.material = sightAreaMaterials[0]; 
                     ReturnToStart();
                 }
             }
             return;
         }
 
-        // 3. Patrulha Normal
+
         PatrolLogic();
     }
 }
 ```
+O EnemyMédio introduz o conceito de persistência e uma estrutura que simula uma "Behavior Tree" (Árvore de Comportamento) simplificada através de estados.
+
+- **`Estados`**: Patrulha, Perseguição e Investigação.
+
+- **`Lógica de Investigação`**: Ao contrário do Fácil, quando o Médio perde o jogador de vista, ele não desiste. Ele entra no estado Investigating:
+   - Desloca-se até à última posição conhecida do jogador (lastPlayerPosition).
+   - Ao chegar lá, inicia um temporizador (waitTimer).
+   - Durante 2 segundos, ele roda sobre si mesmo (transform.Rotate) para "procurar" visualmente o jogador.
+   - Só após esse tempo esgotar sem reencontrar o jogador é que ele desiste e volta à patrulha.
 
 ## __EnemyDifícil.cs__
 
@@ -418,15 +424,11 @@ public class EnemyDificil : EnemyBase
     [Tooltip("Arrasta aqui TODAS as saídas")]
     public Transform[] exitPoints;
 
-    // Destino atribuído
     public Transform MyTargetExit = null;
 
-    // --- TEMPOS ---
-    // Timer LOCAL: Conta quanto tempo EU estive na porta
     private float myTimeAtPost = 0f;
-    private float defenseDuration = 15.0f; // 15 Segundos a contar depois de chegar
+    private float defenseDuration = 15.0f; 
 
-    // Timer LOCAL: Conta o 360 da investigação
     private float searchTimer = 0f;
 
     void Awake() { redSquad.Add(this); }
@@ -434,61 +436,56 @@ public class EnemyDificil : EnemyBase
 
     protected override void RunAI(bool canSeePlayer)
     {
-        // 1. VISÃO (ATAQUE IMEDIATO)
+
         if (canSeePlayer)
         {
-            // Atualiza global
+         
             EnemyBase.GlobalAlarm = true;
             EnemyBase.globalLastPlayerPos = lastPlayerPosition;
 
-            // Ataca (Prioridade Máxima)
-            // Nota: O Recalculate já foi chamado pelo EnemyBase se a visão mudou
+ 
             if (CurrentState != HardState.Ataque) ChangeState(HardState.Ataque);
 
             navAgent.SetDestination(EnemyBase.globalLastPlayerPos);
-            sightAreaRenderer.material = sightAreaMaterials[1]; // Vermelho
+            sightAreaRenderer.material = sightAreaMaterials[1];
             return;
         }
 
-        // 2. MÁQUINA DE ESTADOS
+    
         switch (CurrentState)
         {
             case HardState.Patrulha:
                 if (EnemyBase.GlobalAlarm)
                 {
-                    // Alarme tocou, assume papel atribuído pelo Recalculate
+                
                     UpdateRole();
                 }
                 else
                 {
-                    sightAreaRenderer.material = sightAreaMaterials[0]; // Verde
+                    sightAreaRenderer.material = sightAreaMaterials[0]; 
                     PatrolLogic();
                 }
                 break;
 
             case HardState.Ataque:
-                // Se deixei de ver, vou para o meu posto
                 UpdateRole();
                 break;
 
             case HardState.Defesa:
-                sightAreaRenderer.material = sightAreaMaterials[1]; // Vermelho
+                sightAreaRenderer.material = sightAreaMaterials[1]; 
 
                 if (MyTargetExit != null)
                 {
                     navAgent.SetDestination(MyTargetExit.position);
 
-                    // --- LÓGICA DO TEMPO (CORREÇÃO) ---
-                    // O tempo SÓ conta se já cheguei ao sítio!
                     if (!navAgent.pathPending && navAgent.remainingDistance < 2.0f)
                     {
-                        // Vigia (180º)
+                    
                         LookAt180(EnemyBase.globalLastPlayerPos);
 
-                        // Incrementa o timer local
+                  
                         myTimeAtPost += Time.deltaTime;
 
-                        // Se já fiquei aqui 15s -> Vai Investigar
                         if (myTimeAtPost > defenseDuration)
                         {
                             ChangeState(HardState.Investigacao);
@@ -496,29 +493,27 @@ public class EnemyDificil : EnemyBase
                     }
                     else
                     {
-                        // Se ainda estou a correr para a porta, o timer não avança
-                        // Ele tem de garantir 15s de defesa efetiva
+                 
                     }
                 }
                 else
                 {
-                    // Se não tenho porta (sobra), vai investigar
+  
                     ChangeState(HardState.Investigacao);
                 }
                 break;
 
             case HardState.Investigacao:
-                sightAreaRenderer.material = sightAreaMaterials[2]; // Amarelo
+                sightAreaRenderer.material = sightAreaMaterials[2]; 
                 navAgent.SetDestination(EnemyBase.globalLastPlayerPos);
 
                 if (!navAgent.pathPending && navAgent.remainingDistance < 1.5f)
                 {
-                    transform.Rotate(0, 60 * Time.deltaTime, 0); // 360
+                    transform.Rotate(0, 60 * Time.deltaTime, 0);
 
                     searchTimer += Time.deltaTime;
                     if (searchTimer > 5.0f)
                     {
-                        // Fim do Ciclo
                         EnemyBase.GlobalAlarm = false;
                         ChangeState(HardState.Patrulha);
                         ReturnToStart();
@@ -531,12 +526,11 @@ public class EnemyDificil : EnemyBase
     void ChangeState(HardState newState)
     {
         CurrentState = newState;
-        // Reset aos timers locais ao mudar de estado
+     
         myTimeAtPost = 0f;
         searchTimer = 0f;
     }
 
-    // Decide se vai para Defesa ou Investigação com base na atribuição atual
     void UpdateRole()
     {
         if (MyTargetExit != null)
@@ -549,22 +543,25 @@ public class EnemyDificil : EnemyBase
         }
     }
 
-    // --- CÉREBRO MINMAX GLOBAL (CHAMADO PELO ENEMYBASE) ---
+
     public static void RecalculateSquadTactics()
     {
+   
         foreach (var enemy in redSquad)
         {
             enemy.MyTargetExit = null;
-            enemy.myTimeAtPost = 0f; //
+            enemy.myTimeAtPost = 0f; 
         }
 
         if (redSquad.Count == 0) return;
         Transform[] allExits = redSquad[0].exitPoints;
 
+     
         List<EnemyDificil> defenders = new List<EnemyDificil>();
-
+  
         foreach (var enemy in redSquad) defenders.Add(enemy);
 
+  
         foreach (Transform exit in allExits)
         {
             if (exit == null) continue;
@@ -574,6 +571,9 @@ public class EnemyDificil : EnemyBase
 
             foreach (EnemyDificil enemy in defenders)
             {
+  
+                if (enemy.MyTargetExit != null) continue;
+
                 float d = Vector3.Distance(enemy.transform.position, exit.position);
                 if (d < minDistance)
                 {
@@ -585,6 +585,7 @@ public class EnemyDificil : EnemyBase
             if (bestCandidate != null)
             {
                 bestCandidate.MyTargetExit = exit;
+            
                 if (bestCandidate.CurrentState != HardState.Ataque)
                 {
                     bestCandidate.UpdateRole();
@@ -592,6 +593,7 @@ public class EnemyDificil : EnemyBase
             }
         }
 
+  
         foreach (var enemy in defenders)
         {
             if (enemy.MyTargetExit == null && enemy.CurrentState != HardState.Ataque)
@@ -614,6 +616,17 @@ public class EnemyDificil : EnemyBase
     }
 }
 ```
+O EnemyDifícil é o mais complexo, utilizando uma IA de Coordenação de Grupo. Ele não age apenas individualmente; age como parte de um esquadrão (redSquad) para cercar o jogador.
+
+- **`Lógica Individual (FSM Avançada)`**: Este inimigo possui estados táticos específicos:
+   - Ataque: Perseguição direta (prioridade máxima se tiver visão).
+   - Defesa: O inimigo desloca-se para uma saída específica (MyTargetExit) para bloquear a fuga do jogador. Ao chegar, fica de vigia por 15 segundos.
+   - Investigação: Se não tiver uma saída atribuída ou se o tempo de defesa acabar, ele vai à última posição do jogador, faz uma busca de 360º durante 5 segundos e só depois volta à patrulha.
+
+- **`Distribuição de Tarefas`**: A função estática RecalculateSquadTactics funciona como um comandante central. Sempre que a situação de visão muda, ela redistribui as tarefas de todos os inimigos difíceis ativos:
+  - Análise: Identifica todos os inimigos disponíveis (que não estão ocupados a atacar diretamente) e todas as saídas (exitPoints).
+  - (Greedy): Calcula a distância de cada inimigo a cada saída.
+  - Atribuição: Os inimigos mais próximos das saídas recebem a ordem de Defesa (bloquear a porta). Os inimigos que "sobram" (não são necessários para bloquear portas) recebem a ordem de Investigação (caçar o jogador ativamente).
 
 <a name="Controlos"></a>
 # __Controlos__
