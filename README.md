@@ -87,6 +87,8 @@ O Minimax é um algoritmo de decisão estratégica utilizado para minimizar a pe
 - **`Otimização`**: Como o Minimax gera um espaço de procura exponencial, utiliza-se frequentemente a Poda Alfa-Beta. Esta técnica permite ignorar grandes partes da árvore que não influenciam a decisão final, tornando o processo mais eficiente sem perder precisão.
 - **`Heurísticas`**: Em situações onde não é possível calcular até ao fim do jogo (decisões imperfeitas ou tempo limitado), a função de utilidade final é substituída por uma Função de Avaliação (Heurística), que estima a probabilidade de vitória a partir de um determinado estado.
 
+Nota: Neste projeto o MiniMax segue o princípio de Shannon (1950), ou seja, um método de heurístico de decisão, inspirado no raciocínio estratégico do MiniMax, aplicado de forma local e prática.
+
 <a name="PathFinding"></a>
 ## __PathFinding:__
 
